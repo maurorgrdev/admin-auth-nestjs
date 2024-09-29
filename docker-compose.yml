@@ -6,22 +6,36 @@ services:
       dockerfile: Dockerfile
     container_name: nest-app
     ports:
-      - "3000:3000"
+      - "${PORT}:${PORT}"   
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
     environment:
-      NODE_ENV: development
+      NODE_ENV: ${NODE_ENV} 
     command: npm run start:dev
 
   db:
     image: postgres:16
     container_name: nest-db
     ports:
-      - "5434:5432"
+      - "${POSTGRES_PORT}:${DB_PORT}" 
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: nestdb
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     volumes:
-      - ./postgres-data:/var/lib/postgresql/data  # Persistência de dados
+      - ./postgres-data:/var/lib/postgresql/data 
+
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nest-test
+    environment:
+      NODE_ENV: test
+    command: npm run test
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    depends_on:
+      - db
